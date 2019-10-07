@@ -1,0 +1,57 @@
+trigger:
+- master
+
+pool:
+  vmImage: 'macOS 10.14'
+  
+variables:
+- group: 'iosApps'
+- name: 'sdk'
+  value: 'iphoneos'
+- name: 'configuration'
+  value: 'Release'
+
+steps:
+- task: InstallAppleCertificate@2
+  inputs:
+    certSecureFile: $(iosCertificateSecureFile)
+    certPwd: $(iosCertificatePassword)
+
+- task: InstallAppleProvisioningProfile@1
+  inputs:
+    provProfileSecureFile: $(iosProvisioningProfile)
+    
+- task: Xcode@5
+  displayName: 'Build the UICatalog app using Xcode'
+  inputs:
+    actions: 'build'
+    sdk: $(sdk)
+    configuration: $(configuration)
+    xcWorkspacePath: 'UICatalog/UICatalog.xcodeproj/project.xcworkspace'
+    useXcpretty: false
+    packageApp: true
+    exportPath: '$(Build.ArtifactStagingDirectory)/apps/$(sdk)/$(configuration)/UICatalog'
+    signingOption: 'manual'
+    provisioningProfileUuid: $(APPLE_PROV_PROFILE_UUID)
+    signingIdentity: $(APPLE_CERTIFICATE_SIGNING_IDENTITY)
+
+- task: Xcode@5
+  displayName: 'Build the UIKitCatalog app using Xcode'
+  inputs:
+    actions: 'build'
+    sdk: $(sdk)
+    configuration: $(configuration)
+    xcWorkspacePath: 'UIKitCatalog/UIKitCatalog.xcodeproj/project.xcworkspace'
+    useXcpretty: false
+    packageApp: true
+    exportPath: '$(Build.ArtifactStagingDirectory)/apps/$(sdk)/$(configuration)/UIKitCatalog'
+    signingOption: 'manual'
+    provisioningProfileUuid: $(APPLE_PROV_PROFILE_UUID)
+    signingIdentity: $(APPLE_CERTIFICATE_SIGNING_IDENTITY)
+    xcodeVersion: '11.0'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathToPublish: '$(Build.ArtifactStagingDirectory)/apps'
+    artifactName: 'apps'
+    artifactType: 'container'
