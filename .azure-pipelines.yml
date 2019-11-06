@@ -48,7 +48,7 @@ steps:
     signingOption: 'manual'
     provisioningProfileUuid: $(APPLE_PROV_PROFILE_UUID)
     signingIdentity: $(APPLE_CERTIFICATE_SIGNING_IDENTITY)
-    xcodeVersion: '11.0'
+    # xcodeVersion: '11.0'
 
 - task: PublishBuildArtifacts@1
   inputs:
